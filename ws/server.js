@@ -1,20 +1,21 @@
 const express = require('express');
 const ws = require('ws');
-
+const http = require('http');
 const app = express();
+const server = http.createServer(app);
 
-const wss = new ws.Server({noServer:true});
+const wss = new ws.Server({ noServer: true });
 
 //on event connection call callback with argument websocket
-wss.on('connection', function(ws, req){
-    ws.on('message', message=>console.log(message));
+wss.on('connection', function (ws, req) {
+	console.log('connection established');
+	ws.on('message', (message) =>
+		console.log('Server received message: ', message)
+	);
 });
 
-const server = app.listen(process.env.PORT||3000);
-server.on('upgrade', function (req, ws, head){
-    //on upgrade request by client -> upgrade protocol/connection
-    wss.handleUpgrade(req, ws, head, function(ws){
-        //trigger event 'connection' after upgrade from http to websocket protocol
-        wss.emit('connection', ws, req);
-    })
-})
+app.use(express.static('public'));
+
+server.listen(process.env.PORT || 3000, () => {
+	console.log(`Server is listening on port: ${process.env.PORT || 3000}`);
+});
